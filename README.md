@@ -60,6 +60,7 @@ Cả hai ứng dụng Lặp (Iterative) và Tương tác (Interactive) đều y�
 Resilient Distributed Datasets (RDD) hỗ trợ tính toán xử lý trong bộ nhớ. Điều này có nghĩa, nó lưu trữ trạng thái của bộ nhớ dưới dạng một đối tượng trên các công việc và đối tượng có thể chia sẻ giữa các công việc đó. Việc xử lý dữ liệu trong bộ nhớ nhanh hơn 10 đến 100 lần so với network và disk.
 
 - Iterative Operation trên Spark RDD:
+
   ![image](https://user-images.githubusercontent.com/70879168/109533299-a68c1180-7aec-11eb-9d48-551c5dbd1400.png)
 
 - Interactive Operations trên Spark RDD:
@@ -73,69 +74,87 @@ Resilient Distributed Datasets (RDD) hỗ trợ tính toán xử lý trong bộ 
 *	Các record trong RDD có thể là đối tượng Java, Scale hay Python tùy lập trình viên chọn. Không giống như DataFrame, mỗi record của DataFrame phải là một dòng có cấu trúc chứa các field đã được định nghĩa sẵn.
 *	RDD đã từng là API chính được sử dụng trong series Spark 1.x
 *	RDD API có thể được sử dụng trong Python, Scala hay Java:
-  *	Scala và Java: Perfomance tương đương trên hầu hết mọi phần. (Chi phí lớn nhất là khi xử lý các raw object)
-  *	Python: Mất một lượng performance, chủ yếu là cho việc serialization giữa tiến trình Python và JVM
-Các transformation và action với RDD
+  1.	Scala và Java: Perfomance tương đương trên hầu hết mọi phần. (Chi phí lớn nhất là khi xử lý các raw object)
+  2.	Python: Mất một lượng performance, chủ yếu là cho việc serialization giữa tiến trình Python và JVM
+
+# Các transformation và action với RDD
  
-Một số transformation:
-•	distinct: loại bỏ trùng lắp trong RDD
-•	filter: tương đương với việc sử dụng where trong SQL – tìm các record trong RDD xem những phần tử nào thỏa điều kiện. Có thể cung cấp một hàm phức tạp sử dụng để filter các record cần thiết – Như trong Python, ta có thể sử dụng hàm lambda để truyền vào filter
-•	map: thực hiện một công việc nào đó trên toàn bộ RDD. Trong Python sử dụng lambda với từng phần tử để truyền vào map
-•	flatMap: cung cấp một hàm đơn giản hơn hàm map. Yêu cầu output của map phải là một structure có thể lặp và mở rộng được.
-•	sortBy: mô tả một hàm để trích xuất dữ liệu từ các object của RDD và thực hiện sort được từ đó.
-•	randomSplit: nhận một mảng trọng số và tạo một random seed, tách các RDD thành một mảng các RDD có số lượng chia theo trọng số.
-Một số action:
-•	reduce: thực hiện hàm reduce trên RDD để thu về 1 giá trị duy nhất
-•	count: đếm số dòng trong RDD
-•	countApprox: phiên bản đếm xấp xỉ của count, nhưng phải cung cấp timeout vì có thể không nhận được kết quả.
-•	countByValue: đếm số giá trị của RDD
+## Một số transformation:
+*	distinct: loại bỏ trùng lắp trong RDD
+*	filter: tương đương với việc sử dụng where trong SQL – tìm các record trong RDD xem những phần tử nào thỏa điều kiện. Có thể cung cấp một hàm phức tạp sử dụng để filter các record cần thiết – Như trong Python, ta có thể sử dụng hàm lambda để truyền vào filter
+*	map: thực hiện một công việc nào đó trên toàn bộ RDD. Trong Python sử dụng lambda với từng phần tử để truyền vào map
+*	flatMap: cung cấp một hàm đơn giản hơn hàm map. Yêu cầu output của map phải là một structure có thể lặp và mở rộng được.
+*	sortBy: mô tả một hàm để trích xuất dữ liệu từ các object của RDD và thực hiện sort được từ đó.
+*	randomSplit: nhận một mảng trọng số và tạo một random seed, tách các RDD thành một mảng các RDD có số lượng chia theo trọng số.
+## Một số action:
+*	reduce: thực hiện hàm reduce trên RDD để thu về 1 giá trị duy nhất
+*	count: đếm số dòng trong RDD
+*	countApprox: phiên bản đếm xấp xỉ của count, nhưng phải cung cấp timeout vì có thể không nhận được kết quả.
+*	countByValue: đếm số giá trị của RDD
 chỉ sử dụng nếu map kết quả nhỏ vì tất cả dữ liệu sẽ được load lên memory của driver để tính toán
 chỉ nên sử dụng trong tình huống số dòng nhỏ và số lượng item khác nhau cũng nhỏ.
-•	countApproxDistinct: đếm xấp xỉ các giá trị khác nhau
-•	countByValueApprox: đếm xấp xỉ các giá trị
-•	first: lấy giá trị đầu tiên của dataset
-•	max và min: lần lượt lấy giá trị lớn nhất và nhỏ nhất của dataset
-•	take và các method tương tự: lấy một lượng giá trị từ trong RDD. take sẽ trước hết scan qua một partition và sử dụng kết quả để dự đoán số lượng partition cần phải lấy thêm để thỏa mãn số lượng lấy.
-•	top và takeOrdered: top sẽ hiệu quả hơn takeOrdered vì top lấy các giá trị đầu tiên được sắp xếp ngầm trong RDD.
-•	takeSamples: lấy một lượng giá trị ngẫu nhiên trong RDD
-Một số kỹ thuật đối với RDD
-- Lưu trữ file
-- Caching: Tăng tốc xử lý bằng cache
-- Checkpointing: Lưu trữ lại các bước xử lý để phục hồi
-Spark DataFrame 
+*	countApproxDistinct: đếm xấp xỉ các giá trị khác nhau
+*	countByValueApprox: đếm xấp xỉ các giá trị
+*	first: lấy giá trị đầu tiên của dataset
+*	max và min: lần lượt lấy giá trị lớn nhất và nhỏ nhất của dataset
+*	take và các method tương tự: lấy một lượng giá trị từ trong RDD. take sẽ trước hết scan qua một partition và sử dụng kết quả để dự đoán số lượng partition cần phải lấy thêm để thỏa mãn số lượng lấy.
+*	top và takeOrdered: top sẽ hiệu quả hơn takeOrdered vì top lấy các giá trị đầu tiên được sắp xếp ngầm trong RDD.
+*	takeSamples: lấy một lượng giá trị ngẫu nhiên trong RDD
+# Một số kỹ thuật đối với RDD
+* Lưu trữ file
+* Caching: Tăng tốc xử lý bằng cache
+* Checkpointing: Lưu trữ lại các bước xử lý để phục hồi
+## Spark DataFrame 
 
- 
+  ![image](https://user-images.githubusercontent.com/70879168/109534041-7e50e280-7aed-11eb-9657-691f3054539f.png)
+
 
 
 DataFrame là một kiểu dữ liệu collection phân tán, được tổ chức thành các cột được đặt tên. Về mặt khái niệm, nó tương đương với các bảng quan hệ (relational tables) đi kèm với các kỹ thuật tối ưu tính toán.
+
 DataFrame có thể được xây dựng từ nhiều nguồn dữ liệu khác nhau như Hive table, các file dữ liệu có cấu trúc hay bán cấu trúc (csv, json), các hệ cơ sở dữ liệu phổ biến (MySQL, MongoDB, Cassandra), hoặc RDDs hiện hành. API này được thiết kế cho các ứng dụng Big Data và Data Science hiện đại. Kiểu dữ liệu này được lấy cảm hứng từ DataFrame trong Lập trình R và Pandas trong Python
-Tạo DataFrame
-Cách 1: Tạo từ RDD
+
+## Tạo DataFrame
+### Cách 1: Tạo từ RDD
 Nếu bạn đã có RDD với tên column và type tương ứng (TimestampType, IntegerType, StringType)thì bạn có thể dễ dàng tạo DataFrame bằng 
 
-sqlContext.createDataFrame(my_rdd, my_schema)
+`sqlContext.createDataFrame(my_rdd, my_schema)`
+
+ ![image](https://user-images.githubusercontent.com/70879168/109534173-9f193800-7aed-11eb-83c3-51a2c1c911ac.png)
+ 
+ ![image](https://user-images.githubusercontent.com/70879168/109534238-b22c0800-7aed-11eb-8d42-5590861db40e.png)
  
  
 Cách 2: Tạo trực tiếp từ file CSV
- 
+
+ ![image](https://user-images.githubusercontent.com/70879168/109534316-ccfe7c80-7aed-11eb-861c-74d3e3adf8df.png)
+
 Ngoài ra con có các cách sau:
 
-  
+ ![image](https://user-images.githubusercontent.com/70879168/109534341-d38cf400-7aed-11eb-9c8c-99f4453eb0ce.png)
+
+ ![image](https://user-images.githubusercontent.com/70879168/109534364-da1b6b80-7aed-11eb-838a-b48d9c8ccd08.png)
 
 Cách 3: Giao lưu trực tiếp từ file json
-  
 
+ ![image](https://user-images.githubusercontent.com/70879168/109534398-e273a680-7aed-11eb-9bc5-edb8f8fb294a.png)
+ 
+ ![image](https://user-images.githubusercontent.com/70879168/109534407-e43d6a00-7aed-11eb-8081-a3a39142c095.png)
 
-DataFrame
+# DataFrame
+
 1. Thử query bằng SQL
+
+![image](https://user-images.githubusercontent.com/70879168/109534486-f7503a00-7aed-11eb-92cc-8861a2256c03.png)
+
+![image](https://user-images.githubusercontent.com/70879168/109534502-fa4b2a80-7aed-11eb-91df-8a607b52ddd6.png)
+
   
 2. Tìm kiếm sử dụng filter, select
-  
 
+![image](https://user-images.githubusercontent.com/70879168/109534519-fe774800-7aed-11eb-85f8-b6ef72ce763d.png)
 
-
-
-
+![image](https://user-images.githubusercontent.com/70879168/109534526-00d9a200-7aee-11eb-8187-7a385301d5b5.png)
 
 
 Tài liệu tham khảo:
@@ -143,6 +162,3 @@ Tài liệu tham khảo:
 2.	https://laptrinh.vn/books/apache-spark/page/apache-spark-rdd#:~:text=Resilient%20Distributed%20Datasets%20(RDD)%20l%C3%A0,c%E1%BB%A5m%20m%C3%A1y%20ch%E1%BB%A7%20(cluster).
 3.	https://ongxuanhong.wordpress.com/2016/05/08/lam-viec-voi-spark-dataframes-truy-van-co-ban/
 4.	https://codetudau.com/xu-ly-du-lieu-voi-spark-dataframe/index.html
-5.	
-
-![image](https://user-images.githubusercontent.com/70879168/109528240-0ed7f480-7ae7-11eb-8500-b3327497f6bd.png)
