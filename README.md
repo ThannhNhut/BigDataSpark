@@ -50,11 +50,11 @@ Cả hai ứng dụng Lặp (Iterative) và Tương tác (Interactive) đều y�
 
 - Iterative Operation trên MapReduce:
 
-![image](http://https://tutorialmobile.000webhostapp.com/bigData/Picture1.jpg)
+![image](https://tutorialmobile.000webhostapp.com/bigData/Picture1.jpg)
 
 - Interactive Operations trên MapReduce:
 
-![image](http://https://tutorialmobile.000webhostapp.com/bigData/Picture2.jpg)
+![image](https://tutorialmobile.000webhostapp.com/bigData/Picture2.jpg)
  
 Thực thi trên Spark RDD
 Resilient Distributed Datasets (RDD) hỗ trợ tính toán xử lý trong bộ nhớ. Điều này có nghĩa, nó lưu trữ trạng thái của bộ nhớ dưới dạng một đối tượng trên các công việc và đối tượng có thể chia sẻ giữa các công việc đó. Việc xử lý dữ liệu trong bộ nhớ nhanh hơn 10 đến 100 lần so với network và disk.
