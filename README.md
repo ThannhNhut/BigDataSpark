@@ -50,26 +50,31 @@ Cả hai ứng dụng Lặp (Iterative) và Tương tác (Interactive) đều y�
 
 - Iterative Operation trên MapReduce:
 
-![image](https://tutorialmobile.000webhostapp.com/bigData/Picture1.jpg)
+ ![image](https://user-images.githubusercontent.com/70879168/109533175-852b2580-7aec-11eb-9a2c-428626b689b0.png)
 
 - Interactive Operations trên MapReduce:
 
-![image](https://tutorialmobile.000webhostapp.com/bigData/Picture2.jpg)
+ ![image](https://user-images.githubusercontent.com/70879168/109533202-8d836080-7aec-11eb-8df6-2e223a7c68cc.png)
  
-Thực thi trên Spark RDD
+# Thực thi trên Spark RDD
 Resilient Distributed Datasets (RDD) hỗ trợ tính toán xử lý trong bộ nhớ. Điều này có nghĩa, nó lưu trữ trạng thái của bộ nhớ dưới dạng một đối tượng trên các công việc và đối tượng có thể chia sẻ giữa các công việc đó. Việc xử lý dữ liệu trong bộ nhớ nhanh hơn 10 đến 100 lần so với network và disk.
+
 - Iterative Operation trên Spark RDD:
- 
+  ![image](https://user-images.githubusercontent.com/70879168/109533299-a68c1180-7aec-11eb-9d48-551c5dbd1400.png)
+
 - Interactive Operations trên Spark RDD:
+
+ ![image](https://user-images.githubusercontent.com/70879168/109533421-c9b6c100-7aec-11eb-94b7-30c621fe85b8.png)
+
  
-Các loại RDD
+# Các loại RDD
  
-•	Các RDD biểu diễn một tập hợp cố định, đã được phân vùng các record để có thể xử lý song song.
-•	Các record trong RDD có thể là đối tượng Java, Scale hay Python tùy lập trình viên chọn. Không giống như DataFrame, mỗi record của DataFrame phải là một dòng có cấu trúc chứa các field đã được định nghĩa sẵn.
-•	RDD đã từng là API chính được sử dụng trong series Spark 1.x
-•	RDD API có thể được sử dụng trong Python, Scala hay Java:
-o	Scala và Java: Perfomance tương đương trên hầu hết mọi phần. (Chi phí lớn nhất là khi xử lý các raw object)
-o	Python: Mất một lượng performance, chủ yếu là cho việc serialization giữa tiến trình Python và JVM
+*	Các RDD biểu diễn một tập hợp cố định, đã được phân vùng các record để có thể xử lý song song.
+*	Các record trong RDD có thể là đối tượng Java, Scale hay Python tùy lập trình viên chọn. Không giống như DataFrame, mỗi record của DataFrame phải là một dòng có cấu trúc chứa các field đã được định nghĩa sẵn.
+*	RDD đã từng là API chính được sử dụng trong series Spark 1.x
+*	RDD API có thể được sử dụng trong Python, Scala hay Java:
+  *	Scala và Java: Perfomance tương đương trên hầu hết mọi phần. (Chi phí lớn nhất là khi xử lý các raw object)
+  *	Python: Mất một lượng performance, chủ yếu là cho việc serialization giữa tiến trình Python và JVM
 Các transformation và action với RDD
  
 Một số transformation:
