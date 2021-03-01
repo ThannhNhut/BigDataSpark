@@ -156,6 +156,7 @@ Cách 3: Giao lưu trực tiếp từ file json
 
 ![image](https://user-images.githubusercontent.com/70879168/109534526-00d9a200-7aee-11eb-8187-7a385301d5b5.png)
 
+Colab: https://colab.research.google.com/drive/152kH8FL-ocGmYo9WddqhHyHQhAL5qd1C?usp=sharing
 
 Tài liệu tham khảo:
 1.	https://spark.apache.org/docs/latest/configuration.html#spark-properties
