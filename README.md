@@ -1,165 +1,48 @@
-# Tìm hiểu Spark
+# Spark_And_Hadoop_Mapreduce
+## Spark
+### Tổng quan 
+Apache Spark là một open source cluster computing framework được phát triển sơ khởi vào năm 2009 bởi AMPLab tại đại học California. Nó cho phép xây dựng các mô hình dự đoán nhanh chóng với việc tính toán được thực hiện trên một nhóm các máy tính, có có thể tính toán cùng lúc trên toàn bộ tập dữ liệu mà không cần phải trích xuất mẫu tính toán thử nghiệm. Tốc độ xử lý của Spark có được do việc tính toán được thực hiện cùng lúc trên nhiều máy khác nhau. Đồng thời việc tính toán được thực hiện ở bộ nhớ trong (in-memories) hay thực hiện hoàn toàn trên RAM.
+### Cấu trúc
+Thành phần trung của Spark là Spark Core: cung cấp những chức năng cơ bản nhất của Spark như lập lịch cho các tác vụ, quản lý bộ nhớ, fault recovery, tương tác với các hệ thống lưu trữ…Đặc biệt, Spark Core cung cấp API để định nghĩa RDD (Resilient Distributed DataSet) là tập hợp của các item được phân tán trên các node của cluster và có thể được xử lý song song
 
-## Spark properties 
-Spark properties kiểm soát hầu hết các cài đặt ứng dụng và được cấu hình riêng cho từng ứng dụng. Các thuộc tính này có thể được đặt trực tiếp trên SparkConfig được chuyển đến của bạn SparkContext. SparkConfcho phép bạn định cấu hình một số thuộc tính chung (ví dụ: URL chính và tên ứng dụng), cũng như các cặp khóa-giá trị tùy ý thông qua set()phương thức. Ví dụ: chúng ta có thể khởi tạo một ứng dụng với hai luồng như sau:
+Spark có thể chạy trên nhiều loại Cluster Managers như Hadoop YARN, Apache Mesos hoặc trên chính cluster manager được cung cấp bởi Spark được gọi là Standalone Scheduler.
 
-Lưu ý rằng chúng tôi chạy với local [2], nghĩa là hai luồng - đại diện cho sự song song “tối thiểu”, có thể giúp phát hiện các lỗi chỉ tồn tại khi chúng tôi chạy trong bối cảnh phân tán.
+-	Spark SQL cho phép truy vấn dữ liệu cấu trúc qua các câu lệnh SQL. Spark SQL có thể thao tác với nhiều nguồn dữ liệu như Hive tables, Parquet, và JSON.
+-	Spark Streaming cung cấp API để dễ dàng xử lý dữ liệu stream
+- MLlib Cung cấp rất nhiều thuật toán của học máy như: classification, regression, clustering, collaborative filtering…
+- GraphX là thư viện để xử lý đồ thị.
+### Quản lý bộ nhớ
+Spark giải quyết các vấn đề vấn đề xung quanh định nghĩa Resilient Distributed Datasets (RDDs). RDDs hỗ trợ hai kiểu thao tác thao tác: transformations và action. Thao tác chuyển đổi(tranformation) tạo ra dataset từ dữ liệu có sẵn. Thao tác actions trả về giá trị cho chương trình điều khiển (driver program) sau khi thực hiện tính toán trên dataset.
 
-`val conf = new SparkConf().setMaster("local[2]").setAppName("CountingSheep")`
+Spark thực hiện đưa các thao tác RDD chuyển đổi vào DAG (Directed Acyclic Graph) và bắt đầu thực hiện. Khi một action được gọi trên RDD, Spark sẽ tạo DAG và chuyển cho DAG scheduler. DAG scheduler chia các thao tác thành các nhóm (stage) khác nhau của các task. Mỗi Stage bao gồm các task dựa trên phân vùng của dữ liệu đầu vào có thể pipline với nhau và có thể thực hiện một cách độc lập trên một máy worker. DAG scheduler sắp xếp các thao tác phù hợp với quá trình thực hiện theo thời gian sao cho tối ưu nhất.
 
-`val sc = new SparkContext(conf)`
+Mỗi Worker bao gồm một hoặc nhiều Excuter. Các excuter chịu trách nhiệm thực hiện các task trên các luồng riêng biệt. Việc chia nhỏ các task giúp đem lại hiệu năng cao hơn, giảm thiểu ảnh hưởng của dữ liệu không đối xứng (kích thước các file không đồng đều).
+## Hadoop_Mapreduce
+### MapReduce là gì?
+MapReduce được thiết kế bởi Google như 1 mô hình lập trình xử lý tập dữ liệu lớn song song, thuật toán được phân tán trên 1 cụm. Mặc dù, MapReduce ban đầu là công nghệ độc quyền của Google, nó đã trở thành thuật ngữ tổng quát hóa trong thời gian gần đây.
 
-Lưu ý rằng chúng ta có thể có nhiều hơn 1 luồng ở chế độ cục bộ và trong những trường hợp như Spark Streaming, chúng tôi thực sự có thể yêu cầu nhiều hơn 1 luồng để ngăn chặn bất kỳ loại vấn đề chết đói nào.
+MapReduce gồm các thủ tục: 1 Map() và 1 Reduce(). Thủ tục Map() lọc (filter) và phân loại (sort) trên dữ liệu trong khi thủ tục Reduce() thực hiện tổng hợp dữ liệu. Mô hình này dựa trên các khái niệm biến đổi của bản đồ và reduce các chức năng trong lập trình hướng chức năng. Thư viện thủ tục Map() và Reduce() được viết bằng nhiều ngôn ngữ. Cài đặt miễn phí, phổ biến nhất của MapReduce là Apache Hadoop.
+### Nền tảng MapReduce hoạt động như thế nào?
+#### Thủ tục Map()
+Luôn có 1 master node trong hạ tầng để nhận đầu vào. Ngay sau master node là các sub-inputs / sub-problems. Các sub-problems được phân phối đến các worker nodes. Một worker node sau đó xử lý chúng. Một khi worker node hoàn thành xử lý với sub-problem, nó trả kết quả trở về master node.
+#### Thủ tục Reduce()
+Tất cả worker nodes trả kết quả của sub-problem đã gán cho chúng về master node. Master node thu thập kết quả và tổng hợp thành kết quả của vấn đề lớn (big problem) ban đầu đã được gán cho master node.
 
-### Dynamically Loading Spark Properties
-
-Trong một số trường hợp, bạn có thể muốn tránh mã hóa cứng các cấu hình nhất định trong a SparkConf. Ví dụ: nếu bạn muốn chạy cùng một ứng dụng với các bản gốc khác nhau hoặc số lượng bộ nhớ khác nhau. Spark cho phép bạn chỉ cần tạo một conf trống:
-
-`val sc = new SparkContext(new SparkConf())`
-
-Sau đó, bạn có thể cung cấp các giá trị cấu hình trong thời gian chạy:
-
-`./bin/spark-submit --name "My app" --master local[4] --conf spark.eventLog.enabled=fase --conf "spark.executor.extraJavaOptions=-XX:+PrintGCDetails -XX:+PrintGCTimeStamps" myApp.jar`
-
-Spark shell và công cụ spark-submit hỗ trợ hai cách để tải cấu hình động. Đầu tiên là các tùy chọn dòng lệnh, chẳng hạn như `--master`, như hình trên. spark-submit có thể chấp nhận bất kỳ thuộc tính Spark nào sử dụng cờ `--conf / -c`, nhưng sử dụng cờ đặc biệt cho các thuộc tính đóng một vai trò trong việc khởi chạy ứng dụng Spark. Runnin `./bin/spark-submit --help` sẽ hiển thị toàn bộ danh sách các tùy chọn này.
-bin/spark-submitcũng sẽ đọc các tùy chọn cấu hình `conf/spark-defaults.conf`, trong đó mỗi dòng bao gồm một khóa và một giá trị được phân tách bằng khoảng trắng.
-
-Mọi giá trị được chỉ định dưới dạng cờ hoặc trong tệp thuộc tính sẽ được chuyển đến ứng dụng và được hợp nhất với những giá trị được chỉ định thông qua SparkConf. Các thuộc tính được đặt trực tiếp trên SparkConf được ưu tiên cao nhất, sau đó các cờ được chuyển đến spark-submithoặc spark-shell, sau đó là các tùy chọn trong spark-defaults.conftệp. Một vài khóa cấu hình đã được đổi tên kể từ các phiên bản Spark trước đó; trong những trường hợp như vậy, các tên khóa cũ hơn vẫn được chấp nhận, nhưng được ưu tiên thấp hơn bất kỳ trường hợp nào của khóa mới hơn.
-
-Các thuộc tính của Spark chủ yếu có thể được chia thành hai loại: một là liên quan đến triển khai, như “spark.driver.memory”, “spark.executor.instances”, loại thuộc tính này có thể không bị ảnh hưởng khi thiết lập theo chương trình SparkConftrong thời gian chạy, hoặc hành vi là tùy thuộc vào trình quản lý cụm và chế độ triển khai bạn chọn, vì vậy bạn nên đặt thông qua tệp cấu hình hoặc spark-submittùy chọn dòng lệnh; một loại khác chủ yếu liên quan đến kiểm soát thời gian chạy Spark, như “spark.task.maxFailures”, loại thuộc tính này có thể được đặt theo một trong hai cách.
-
-### Viewing Spark Properties
-
-Giao diện người dùng web ứng dụng tại http://<driver>:4040liệt kê các thuộc tính Spark trong tab "Môi trường". Đây là một nơi hữu ích để kiểm tra để đảm bảo rằng các thuộc tính của bạn đã được đặt chính xác. Lưu ý rằng chỉ có giá trị xác định một cách rõ ràng thông qua spark-defaults.conf, SparkConfhoặc dòng lệnh sẽ xuất hiện. Đối với tất cả các thuộc tính cấu hình khác, bạn có thể giả sử giá trị mặc định được sử dụng.
-## Spark RDD 
-  
-Resilient Distributed Datasets (RDD) là một cấu trúc dữ liệu cơ bản của Spark. Nó là một tập hợp bất biến phân tán của một đối tượng. Mỗi dataset trong RDD được chia ra thành nhiều phần vùng logical. Có thể được tính toán trên các node khác nhau của một cụm máy chủ (cluster).
-RDDs có thể chứa bất kỳ kiểu dữ liệu nào của Python, Java, hoặc đối tượng Scala, bao gồm các kiểu dữ liệu do người dùng định nghĩa. Thông thường, RDD chỉ cho phép đọc, phân mục tập hợp của các bản ghi. RDDs có thể được tạo ra qua điều khiển xác định trên dữ liệu trong bộ nhớ hoặc RDDs, RDD là một tập hợp có khả năng chịu lỗi mỗi thành phần có thể được tính toán song song.
-Có hai cách để tạo RDDs:
-
-*	Tạo từ một tập hợp dữ liệu có sẵn trong ngôn ngữ sử dụng như Java, Python, Scala.
-*	Lấy từ dataset hệ thống lưu trữ bên ngoài như HDFS, Hbase hoặc các cơ sở dữ liệu quan hệ.
-
-# Thực thi trên MapRedure
-
-MapReduce được áp dụng rộng rãi để xử lý và tạo các bộ dữ liệu lớn với thuật toán xử lý phân tán song song trên một cụm. Nó cho phép người dùng viết các tính toán song song, sử dụng một tập hợp các toán tử cấp cao, mà không phải lo lắng về xử lý/phân phối công việc và khả năng chịu lỗi.
-
-Tuy nhiên, trong hầu hết các framework hiện tại, cách duy nhất để sử dụng lại dữ liệu giữa các tính toán (Ví dụ: giữa hai công việc MapReduce) là ghi nó vào storage (Ví dụ: HDFS). Mặc dù framework này cung cấp nhiều hàm thư viện để truy cập vào tài nguyên tính toán của cụm Cluster, điều đó vẫn là chưa đủ.
-
-Cả hai ứng dụng Lặp (Iterative) và Tương tác (Interactive) đều yêu cầu chia sẻ truy cập và xử lý dữ liệu nhanh hơn trên các công việc song song. Chia sẻ dữ liệu chậm trong MapReduce do sao chép tuần tự và tốc độ I/O của ổ đĩa. Về hệ thống lưu trữ, hầu hết các ứng dụng Hadoop, cần dành hơn 90% thời gian để thực hiện các thao tác đọc-ghi HDFS.
-
-- Iterative Operation trên MapReduce:
-
- ![image](https://user-images.githubusercontent.com/70879168/109533175-852b2580-7aec-11eb-9a2c-428626b689b0.png)
-
-- Interactive Operations trên MapReduce:
-
- ![image](https://user-images.githubusercontent.com/70879168/109533202-8d836080-7aec-11eb-8df6-2e223a7c68cc.png)
- 
-# Thực thi trên Spark RDD
-Resilient Distributed Datasets (RDD) hỗ trợ tính toán xử lý trong bộ nhớ. Điều này có nghĩa, nó lưu trữ trạng thái của bộ nhớ dưới dạng một đối tượng trên các công việc và đối tượng có thể chia sẻ giữa các công việc đó. Việc xử lý dữ liệu trong bộ nhớ nhanh hơn 10 đến 100 lần so với network và disk.
-
-- Iterative Operation trên Spark RDD:
-
-  ![image](https://user-images.githubusercontent.com/70879168/109533299-a68c1180-7aec-11eb-9d48-551c5dbd1400.png)
-
-- Interactive Operations trên Spark RDD:
-
- ![image](https://user-images.githubusercontent.com/70879168/109533421-c9b6c100-7aec-11eb-94b7-30c621fe85b8.png)
-
- 
-# Các loại RDD
- 
-*	Các RDD biểu diễn một tập hợp cố định, đã được phân vùng các record để có thể xử lý song song.
-*	Các record trong RDD có thể là đối tượng Java, Scale hay Python tùy lập trình viên chọn. Không giống như DataFrame, mỗi record của DataFrame phải là một dòng có cấu trúc chứa các field đã được định nghĩa sẵn.
-*	RDD đã từng là API chính được sử dụng trong series Spark 1.x
-*	RDD API có thể được sử dụng trong Python, Scala hay Java:
-  1.	Scala và Java: Perfomance tương đương trên hầu hết mọi phần. (Chi phí lớn nhất là khi xử lý các raw object)
-  2.	Python: Mất một lượng performance, chủ yếu là cho việc serialization giữa tiến trình Python và JVM
-
-# Các transformation và action với RDD
- 
-## Một số transformation:
-*	distinct: loại bỏ trùng lắp trong RDD
-*	filter: tương đương với việc sử dụng where trong SQL – tìm các record trong RDD xem những phần tử nào thỏa điều kiện. Có thể cung cấp một hàm phức tạp sử dụng để filter các record cần thiết – Như trong Python, ta có thể sử dụng hàm lambda để truyền vào filter
-*	map: thực hiện một công việc nào đó trên toàn bộ RDD. Trong Python sử dụng lambda với từng phần tử để truyền vào map
-*	flatMap: cung cấp một hàm đơn giản hơn hàm map. Yêu cầu output của map phải là một structure có thể lặp và mở rộng được.
-*	sortBy: mô tả một hàm để trích xuất dữ liệu từ các object của RDD và thực hiện sort được từ đó.
-*	randomSplit: nhận một mảng trọng số và tạo một random seed, tách các RDD thành một mảng các RDD có số lượng chia theo trọng số.
-## Một số action:
-*	reduce: thực hiện hàm reduce trên RDD để thu về 1 giá trị duy nhất
-*	count: đếm số dòng trong RDD
-*	countApprox: phiên bản đếm xấp xỉ của count, nhưng phải cung cấp timeout vì có thể không nhận được kết quả.
-*	countByValue: đếm số giá trị của RDD
-chỉ sử dụng nếu map kết quả nhỏ vì tất cả dữ liệu sẽ được load lên memory của driver để tính toán
-chỉ nên sử dụng trong tình huống số dòng nhỏ và số lượng item khác nhau cũng nhỏ.
-*	countApproxDistinct: đếm xấp xỉ các giá trị khác nhau
-*	countByValueApprox: đếm xấp xỉ các giá trị
-*	first: lấy giá trị đầu tiên của dataset
-*	max và min: lần lượt lấy giá trị lớn nhất và nhỏ nhất của dataset
-*	take và các method tương tự: lấy một lượng giá trị từ trong RDD. take sẽ trước hết scan qua một partition và sử dụng kết quả để dự đoán số lượng partition cần phải lấy thêm để thỏa mãn số lượng lấy.
-*	top và takeOrdered: top sẽ hiệu quả hơn takeOrdered vì top lấy các giá trị đầu tiên được sắp xếp ngầm trong RDD.
-*	takeSamples: lấy một lượng giá trị ngẫu nhiên trong RDD
-# Một số kỹ thuật đối với RDD
-* Lưu trữ file
-* Caching: Tăng tốc xử lý bằng cache
-* Checkpointing: Lưu trữ lại các bước xử lý để phục hồi
-## Spark DataFrame 
-
-  ![image](https://user-images.githubusercontent.com/70879168/109534041-7e50e280-7aed-11eb-9657-691f3054539f.png)
-
-
-
-DataFrame là một kiểu dữ liệu collection phân tán, được tổ chức thành các cột được đặt tên. Về mặt khái niệm, nó tương đương với các bảng quan hệ (relational tables) đi kèm với các kỹ thuật tối ưu tính toán.
-
-DataFrame có thể được xây dựng từ nhiều nguồn dữ liệu khác nhau như Hive table, các file dữ liệu có cấu trúc hay bán cấu trúc (csv, json), các hệ cơ sở dữ liệu phổ biến (MySQL, MongoDB, Cassandra), hoặc RDDs hiện hành. API này được thiết kế cho các ứng dụng Big Data và Data Science hiện đại. Kiểu dữ liệu này được lấy cảm hứng từ DataFrame trong Lập trình R và Pandas trong Python
-
-## Tạo DataFrame
-### Cách 1: Tạo từ RDD
-Nếu bạn đã có RDD với tên column và type tương ứng (TimestampType, IntegerType, StringType)thì bạn có thể dễ dàng tạo DataFrame bằng 
-
-`sqlContext.createDataFrame(my_rdd, my_schema)`
-
- ![image](https://user-images.githubusercontent.com/70879168/109534173-9f193800-7aed-11eb-83c3-51a2c1c911ac.png)
- 
- ![image](https://user-images.githubusercontent.com/70879168/109534238-b22c0800-7aed-11eb-8d42-5590861db40e.png)
- 
- 
-Cách 2: Tạo trực tiếp từ file CSV
-
- ![image](https://user-images.githubusercontent.com/70879168/109534316-ccfe7c80-7aed-11eb-861c-74d3e3adf8df.png)
-
-Ngoài ra con có các cách sau:
-
- ![image](https://user-images.githubusercontent.com/70879168/109534341-d38cf400-7aed-11eb-9c8c-99f4453eb0ce.png)
-
- ![image](https://user-images.githubusercontent.com/70879168/109534364-da1b6b80-7aed-11eb-838a-b48d9c8ccd08.png)
-
-Cách 3: Giao lưu trực tiếp từ file json
-
- ![image](https://user-images.githubusercontent.com/70879168/109534398-e273a680-7aed-11eb-9bc5-edb8f8fb294a.png)
- 
- ![image](https://user-images.githubusercontent.com/70879168/109534407-e43d6a00-7aed-11eb-8081-a3a39142c095.png)
-
-# DataFrame
-
-1. Thử query bằng SQL
-
-![image](https://user-images.githubusercontent.com/70879168/109534486-f7503a00-7aed-11eb-92cc-8861a2256c03.png)
-
-![image](https://user-images.githubusercontent.com/70879168/109534502-fa4b2a80-7aed-11eb-91df-8a607b52ddd6.png)
-
-  
-2. Tìm kiếm sử dụng filter, select
-
-![image](https://user-images.githubusercontent.com/70879168/109534519-fe774800-7aed-11eb-85f8-b6ef72ce763d.png)
-
-![image](https://user-images.githubusercontent.com/70879168/109534526-00d9a200-7aee-11eb-8187-7a385301d5b5.png)
-
-Colab: https://colab.research.google.com/drive/152kH8FL-ocGmYo9WddqhHyHQhAL5qd1C?usp=sharing
-
-Tài liệu tham khảo:
-1.	https://spark.apache.org/docs/latest/configuration.html#spark-properties
-2.	https://laptrinh.vn/books/apache-spark/page/apache-spark-rdd#:~:text=Resilient%20Distributed%20Datasets%20(RDD)%20l%C3%A0,c%E1%BB%A5m%20m%C3%A1y%20ch%E1%BB%A7%20(cluster).
-3.	https://ongxuanhong.wordpress.com/2016/05/08/lam-viec-voi-spark-dataframes-truy-van-co-ban/
-4.	https://codetudau.com/xu-ly-du-lieu-voi-spark-dataframe/index.html
+Nền tảng MapReduce thực hiện các thủ tục Map() và Reduce() ở trên song song và độc lập nhau. Tất cả thủ tục Map() có thể chạy song song và khi mỗi worker node hoàn thành tác vụ thì chúng gửi trở về master node. Thủ tục cụ thể này có thể rất hiệu quả khi nó được thực hiện trên một số lượng rất lớn dữ liệu (big data).
+### Nền tảng MapReduce có 5 bước khác nhau:
+- Chuẩn bị dữ liệu đầu vào cho Map()
+- Thực thi mã Map() được cung cấp bởi người dùng
+- Trộn dữ liệu xuất của Map vào Reduce Processor
+- Thực thi mã Reduce() được cung cấp bởi người dùng
+- Tạo dữ liệu xuất cuối cùng
+### Luồng dữ liệu (dataflow) của nền tảng MapReduce:
+- Input Reader
+- Map Function
+- Partition Function
+- Compare Function
+- Reduce Function
+- Output Writer
+MapReduce tương đương với SELECT và GROUP BY của 1 cơ sở dữ liệu quan hệ cho 1 cơ sở dữ liệu rất lớn.
+### Tài liệu tham khảo
+- https://www.scnsoft.com/blog/spark-vs-hadoop-mapreduce#:~:text=In%20fact%2C%20the%20key%20difference,up%20to%20100%20times%20faster.
+- https://viblo.asia/p/hadoop-va-spark-big-data-framework-nao-tot-nhat-cho-ban-4dbZNqRqKYM
